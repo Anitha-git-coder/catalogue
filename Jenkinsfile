@@ -1,91 +1,84 @@
 pipeline {
-    // these are prebuild section
+
     agent {
         node {
-        label 'AGENT-1'
-       }
+            label 'AGENT-1'
+        }
     }
-    environment { 
+
+    environment {
         COURSE = "Jenkins"
-        appVersion = ""
     }
-     options {
-        // Timeout counter starts AFTER agent is allocated
+
+    options {
         timeout(time: 5, unit: 'MINUTES')
         disableConcurrentBuilds()
     }
-    
-    // this is build section //
+
+    parameters {
+        booleanParam(name: 'DEPLOY', defaultValue: false, description: 'Deploy application')
+    }
+
     stages {
+
         stage('ReadVersion') {
             steps {
-                script{                        
-                           def packageJSON = readJSON file: 'package.json'
-                           appVersion = packageJSON.version
-                           echo "app version: ${appVersion}"
+                script {
+                    def packageJSON = readJSON file: 'package.json'
+                    env.appVersion = packageJSON.version
+                    echo "app version: ${env.appVersion}"
                 }
-               
             }
         }
+
         stage('Install Dependencies') {
             steps {
-                 script{
-                        sh """ 
-                         npm install
-                        """
-                }
+                sh '''
+                npm install
+                '''
             }
         }
 
-         stage('Image Build') {
+        stage('Image Build') {
             steps {
-                 script{
-                        sh """ 
-                         docker build -t catalogue:${appVersion} .
-                         docker images
-                        """
-                }
+                sh """
+                docker build -t catalogue:${env.appVersion} .
+                docker images
+                """
             }
         }
+
         stage('Deploy') {
-            //      input {
-            //     message "Should we continue?"
-            //     ok "Yes, we should."
-            //     submitter "alice,bob"
-            //     parameters {
-            //         string(name: 'PERSON', defaultValue: 'Mr Jenkins', description: 'Who should I say hello to?')
-            //     }
-            // }
 
-            when { 
-                expression { "$params.DEPLOY" == "true" }
-             }
+            when {
+                expression { params.DEPLOY }
+            }
 
             steps {
-                 script{
-                        sh """ 
-                        echo "Deploying"
-                        """
-                }
+                sh '''
+                echo "Deploying"
+                '''
             }
         }
     }
 
-     post { 
-        always { 
+    post {
+
+        always {
             echo 'I will always say Hello again!'
             cleanWs()
         }
-        success{
-                 echo 'its success!!!'   
+
+        success {
+            echo 'its success!!!'
         }
-        failure{
-                echo 'its failure !!!'
+
+        failure {
+            echo 'its failure !!!'
         }
-       aborted {
-                echo 'pipeline is aborted'
-            }
+
+        aborted {
+            echo 'pipeline is aborted'
+        }
     }
-
-
 }
