@@ -46,7 +46,7 @@ pipeline {
             }
         }
         //Here you need to select scanner tool and send the analysis to server
-        /* stage('Sonar Scan'){
+        stage('Sonar Scan'){
             environment {
                 def scannerHome = tool 'sonar-8.0'
             }
@@ -66,7 +66,7 @@ pipeline {
                     waitForQualityGate abortPipeline: true 
                 }
             }
-        } */
+        } 
         stage('Dependabot Security Gate') {
             environment {
                 GITHUB_OWNER = 'daws-86s'
