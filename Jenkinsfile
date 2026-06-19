@@ -6,7 +6,7 @@ def configMap = [
 ]
 
 echo "Going to execute Jenkins shared library"
-// if branch is not equal to main, then run CI pipeline.
+// if branch is not equal to main, then run CI pipeline
 if ( ! env.BRANCH_NAME.equalsIgnoreCase('main') ){
     nodeJSEKSPipeline(configMap)
 }
